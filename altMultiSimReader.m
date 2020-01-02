@@ -18,7 +18,7 @@ for currD = 1:length(rangeOfDen)
     dens = extractBetween(filepath,'den_','\');
     if ~(isfile(filepath))
             filepath = extractBetween(filepath,'','t_max_');
-            filepath = strcat(filepath, "t_max_350.csv")
+            filepath = strcat(filepath, "t_max_350.csv");
     end
     if (~isfile(filepath))
         "BROKEN"
@@ -144,53 +144,6 @@ set(gca,'xticklabel',num2str(abs(get(gca,'xtick').')))
 legend('Location','northeastoutside');
 ylabel('Intensity', 'FontSize', 16)
 xlabel('Associated Principal Quantum Number', 'FontSize', 16)
-%%
-
-% this function gives you the value in a sorted array closest to the one
-% you are looking for
-function [index,curr] = binarySearch(arr,lf,dir)
-%arr = a sorted array
-%lf = number you are looking for
-%dir = true if the matrix is in reverse order
-if(exist('dir','var'))
-    arr = flip(arr,1);
-end
-index = round((1+length(arr))/2);
-lower = 1;
-upper = length(arr);
-
-while (lower < upper)
-    index = floor((lower+upper)/2);
-    curr = arr(index,1);
-    if (curr == lf)
-        if(exist('dir','var'))
-            index = length(arr) + 1 - index;
-        end
-        return;
-    end
-    if (curr > lf)
-        upper = index;
-    end
-    
-    if (curr < lf)
-        lower = index +1;
-    end
-    
-end
-
-if (index<length(arr) && abs(arr(index+1)-lf) < abs(arr(index)-lf))
-    index = index +1;
-    curr = arr(index);
-end
-if (index>1 && abs(arr(index-1)-lf) < abs(arr(index)-lf))
-    index = index -1;
-    curr = arr(index);
-end
-if(exist('dir','var'))
-    index = length(arr) + 1 - index;
-end
-return;
-end
 
 function [lineshape,omega] = makeLineshape(Intensity)
     sigma = 0;
@@ -203,9 +156,9 @@ function [lineshape,omega] = makeLineshape(Intensity)
     
     
     nn = 1;
-    for n = minN:1:maxN
-        omega_0 = -109735/(n^2);
-        HalfGamma(nn) = 9120/(n^3);
+    for currN = minN:1:maxN
+        omega_0 = -109735/(currN^2);
+        HalfGamma(nn) = 9120/(currN^3);
         for m = 1:length(omega)
             epsilon = (omega(m) - omega_0)/HalfGamma(nn);
             sigma(m) = Intensity(nn)*((q + epsilon)^2)/(1 + epsilon^2);
