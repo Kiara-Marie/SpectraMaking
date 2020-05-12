@@ -3,8 +3,8 @@ function [] =  concatenateDataWithFewerTimes(desiredPoints)
 % Initialization which you may need to edit
 pow = 2; % uj (Still needed because it is in the original filenames)
 N = 100; % shells
-rangeOfPQN = 21:75;
-rangeOfDen = ["0p03","0p05","0p1","0p2","0p4","0p6"];
+rangeOfPQN = 30:80;
+rangeOfDen = ["0p001","0p01","0p1","0p","0p4","0p6"];
 rangeOfEndTime = [350,350,350,350,350,350]; %tmax for each in ns
 whichShell = 30;
 
