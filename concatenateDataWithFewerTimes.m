@@ -1,23 +1,23 @@
 function [] =  concatenateDataWithFewerTimes(desiredPoints)
 
 % Initialization which you may need to edit
-pow = 2; % uj (Still needed because it is in the original filenames)
 N = 100; % shells
-rangeOfPQN = 30:80;
-rangeOfDen = ["0p001","0p01","0p1","0p","0p4","0p6"];
-rangeOfEndTime = [350,350,350,350,350,350]; %tmax for each in ns
-whichShell = 30;
+NumSavedShells = 1;
+rangeOfPQN = 30:32;
+rangeOfDen = ["0p01"];
+rangeOfEndTime = [200]; %tmax for each in ns
+whichShell = 0; %zero index
 
 
 for rIndex = 1:length(rangeOfDen)
     %Initialization of things that will be used
-    megaMatrix = zeros(10000,numel(rangeOfPQN)*6);
+    megaMatrix = zeros(desiredPoints,numel(rangeOfPQN)*6);
     
     r = rangeOfDen(1,rIndex);
     t_max = rangeOfEndTime(1,rIndex);
     
     % Go into the directory with the info we want
-    dirname = ['C:\Users\Kiara\Documents\glw\CleanBifurcation\Results\Oct14\BestCalcs_den_' , strrep(num2str(r),'.','p')];
+    dirname = ['C:\Kevin\Matlab\Spectra_Simulation\SpectraMaking\Results\TestCalcs_den_' , strrep(num2str(r),'.','p')];
     cd (dirname);
     pqnIndex = 1;
     for pqn = rangeOfPQN
@@ -26,16 +26,16 @@ for rIndex = 1:length(rangeOfDen)
         filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , 'Density_' , strrep(num2str(r),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(t_max),'.csv'];
         if ~(isfile(filename))
             new_t = 800;
-        else 
+        else
             new_t = t_max;
         end
         
-         filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , 'Density_' , strrep(num2str(r),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(new_t),'.csv'];
+        filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , 'Density_' , strrep(num2str(r),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(new_t),'.csv'];
         if ~(isfile(filename))
             fprintf("missing file! %s\n", filename);
             continue;
         end
-         % Get values from file
+        % Get values from file
         [time ,totaldeac, totalRyd, eTotal,Te,vol] = readDenTimePlots();
         start = (pqnIndex*6)-5;
         fin = ((pqnIndex+1)*6)-6;
@@ -44,7 +44,7 @@ for rIndex = 1:length(rangeOfDen)
         
         pqnIndex = pqnIndex + 1;
     end
-    fileToWrite = ['Nov6_ShellThirtyDataConcat_Den_' , strrep(num2str(r),'.','p') , '_shells_' , num2str(N) , '_t_max_' ,num2str(new_t),'.csv' ];
+    fileToWrite = ['May3rd_SumShells_Den_' , strrep(num2str(r),'.','p') , '_shells_' , num2str(N) , '_t_max_' ,num2str(new_t),'.csv' ];
     
     cHeader = repelem(rangeOfPQN,6);
     cHeader = sprintfc('%d',cHeader);
@@ -52,7 +52,7 @@ for rIndex = 1:length(rangeOfDen)
     commaHeader = commaHeader(:)';
     headerOne = cell2mat(commaHeader); %cHeader in text with commas
     
-    cHeader = {'Time' 'Rydbergs' 'Deactivated' 'Electrons' 'Electron Temperature' 'Volume'}; 
+    cHeader = {'Time' 'Rydbergs' 'Deactivated' 'Electrons' 'Electron Temperature' 'Volume'};
     cHeader = repmat(cHeader,1,numel(rangeOfPQN));
     commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commaas
     commaHeader = commaHeader(:)';
@@ -68,9 +68,27 @@ for rIndex = 1:length(rangeOfDen)
 end
 
     function [time,totalRyd,totaldeac,totalE,Te,vol] = readDenTimePlots()
-       
+        
         mat = csvread([filename]);
         allTimes = mat(:,1);
+        if length(allTimes) == desiredPoints
+            time = allTimes;
+        elseif length(allTimes) < desiredPoints
+            msg = 'Not enough points';
+            error(msg);
+        else
+            [time,totalRyd,totaldeac,totalE,Te,vol]= readDenTimePlotsWithTooManyPoints();
+        end
+        time(:,:) = mat(:,1);
+        totalRyd(:,:) = mat(:,whichShell+2);
+        totaldeac(:,:) = mat(:,whichShell+NumSavedShells+2);
+        totalE(:,:) = mat(:,whichShell+2*NumSavedShells+2);
+        Te(:,:) = mat(:,3*NumSavedShells+2);
+        vol(:,:) = mat(:,3*NumSavedShells+3);
+    end
+
+    function [time,totalRyd,totaldeac,totalE,Te,vol]= readDenTimePlotsWithTooManyPoints()
+        
         gap = (max(allTimes) - min(allTimes))/desiredPoints;
         prevT = allTimes(1);
         toFill = 1;
@@ -81,23 +99,23 @@ end
         totalE = zeros(desiredPoints,1);
         Te = zeros(desiredPoints,1);
         vol = zeros(desiredPoints,1);
-       
+        
         time(1,1) = mat(1,1);
         totalRyd(1,1) = mat(1,whichShell+2);
-        totaldeac(1,1) = mat(1,whichShell+N+2);
-        totalE(1,1) = mat(1,whichShell+2*N+2);
-        Te(1,1) = mat(1,3*N+2);
-        vol(1,1) = mat(1,3*N+3);
-       
+        totaldeac(1,1) = mat(1,whichShell+NumSavedShells+2);
+        totalE(1,1) = mat(1,whichShell+2*NumSavedShells+2);
+        Te(1,1) = mat(1,3*NumSavedShells+2);
+        vol(1,1) = mat(1,3*NumSavedShells+3);
+        
         for i = 2:length(allTimes)
             currT = allTimes(i);
             if (currT - prevT > gap)
                 time(toFill,1) = mat(i,1);
                 totalRyd(toFill,1) = mat(i,whichShell+1);
-                totaldeac(toFill,1) = mat(i,whichShell+N+1);
-                totalE(toFill,1) = mat(i,whichShell+2*N+1);
-                Te(toFill,1) = mat(i,whichShell+3*N+1);
-                vol(toFill,1) = mat(i,whichShell+3*N+2);
+                totaldeac(toFill,1) = mat(i,whichShell+NumSavedShells+1);
+                totalE(toFill,1) = mat(i,whichShell+2*NumSavedShells+1);
+                Te(toFill,1) = mat(i,whichShell+3*NumSavedShells+1);
+                vol(toFill,1) = mat(i,whichShell+3*NumSavedShells+2);
                 toFill = toFill + 1;
                 prevT = currT;
             end

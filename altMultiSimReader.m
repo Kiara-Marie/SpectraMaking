@@ -1,12 +1,12 @@
 % Read .csv files with shell model output at various peak densities
 function [] = altMultiSimReader()
-rangeOfDen = ["0p03","0p05","0p1","0p2","0p4","0p6"];
+rangeOfDen = ["0p01"];
 rangeOfDen = fliplr(rangeOfDen);
-whichShell = 30;
+whichShell = 1;
 %select an input .csv file
-pathPrefix = "C:\Users\Kiara\Documents\glw\CleanBifurcation\Results\Oct14\";
-pathSuffix = "BestCalcs_den_0p1\Nov6_ShellThirtyDataConcat_Den_0p1_shells_100_t_max_800.csv";
-betweenOffset = 2;
+pathPrefix = "C:\Kevin\Matlab\Spectra_Simulation\SpectraMaking\Results\";
+pathSuffix = "TestCalcs_den_0p1\May3rd_SumShells_Den_0p01_shells_100_t_max_200.csv";
+betweenOffset = 0;
 megaFigure = figure();
 megaRFigure = figure();
 megaEFigure = figure();
@@ -34,7 +34,7 @@ for currD = 1:length(rangeOfDen)
     
     PQNvector = unique(PQNtable);
     minN = PQNvector(1);
-    maxN = 75;
+    maxN = 32;
     
     %make plot label
     
