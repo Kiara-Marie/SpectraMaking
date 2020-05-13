@@ -1,13 +1,14 @@
 function [] = integrateBalancedParticles()
-% if either electrons or rydbergs represent more than 30% of the particles,
-% they will be included in the sum
-equalThreshhold = 0.3;
+% if both electrons and rydbergs represent more than this proportion
+% of the particles they will be included in the sum
+equalThreshhold = 0.05;
 
 % Initialization which you may need to edit
 N = 100; % shells
 rangeOfPQN = 30:80;
-rangeOfDen = [0.001,0.01, 0.05, 0.1,0.5, 1];
+rangeOfDen = [0.001,0.01,0.05,0.1,0.5, 1];
 t_max = 200;
+t_begin = 25;
 
 %Initialization of things that will be used
 megaMatrix = zeros(numel(rangeOfDen), numel(rangeOfPQN) + 1);
@@ -30,12 +31,14 @@ for rIndex = 1:length(rangeOfDen)
             continue;
         end
         % Get values from file
-        megaMatrix(rIndex, pqnIndex) = getIntegralOfBalanced(filename, N, equalThreshhold);
+        megaMatrix(rIndex, pqnIndex) = getIntegralOfBalanced(filename, N, equalThreshhold, t_begin);
         pqnIndex = pqnIndex + 1;
     end
 end
     cd '..'
-    fileToWrite = ['May12IntegralCalc_shells_' , num2str(N) , '_t_max_' ,num2str(t_max),'.csv' ];
+    fileToWrite = ['IntegralCalc_BalancePoint_'...
+        ,strrep(num2str(equalThreshhold),'.','p')...
+        , '_t_begin_' , num2str(t_begin), '.csv' ];
     cHeader = sprintfc('%d',rangeOfPQN);
     commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commaas
     commaHeader = commaHeader(:)';
@@ -50,16 +53,19 @@ end
     dlmwrite(fileToWrite,megaMatrix,'-append');
 end
 
-function [result] = getIntegralOfBalanced(filename, N, balancedThreshold)
+function [result] = getIntegralOfBalanced(filename, N, balancedThreshold, t_begin)
 % matrix is organized [times,totalRyd,totaldeac,totalE,Te,vol]
 %                      1        N         N       N    1   N
 result = 0;
 mat = csvread(filename);
-totalRyd = mat(:,2:N+1);
-totalElectrons = mat(:,N*2+2:3*N+1);
+times = mat(:,1);
 
-justBalancedRyd = totalRyd((totalRyd >= balancedThreshold) & (totalRyd <= (1 - balancedThreshold)));
-justBalancedElectrons = totalElectrons((totalElectrons >= balancedThreshold) & (totalElectrons <= (1 - balancedThreshold)));
+[t_begin_index,~] = binarySearch(times,t_begin);
+totalRyd = mat(t_begin_index:end,2:N+1);
+totalElectrons = mat(t_begin_index:end,N*2+2:3*N+1);
+
+justBalancedRyd = totalRyd((totalRyd >= balancedThreshold) & (totalElectrons >= balancedThreshold));
+justBalancedElectrons = totalElectrons((totalRyd >= balancedThreshold) & (totalElectrons >= balancedThreshold));
 
 summedRyd = sum(justBalancedRyd, 1);
 result = result + sum(summedRyd, 1);
