@@ -1,5 +1,6 @@
 function bestIterateAllShells(density,t_max,rangeOfPQN)
-SumOverShells = true;
+sumOverShells = false;
+fractionExpressedOutOfTrueTotal = true;
 
 % runs simulation with density in um^-3, t_max in ns
 
@@ -64,13 +65,16 @@ end
         
         totaldeac = deac_dr+nmDeacPerShell+pdDeacPerShell;
         
-        if SumOverShells 
+        if sumOverShells 
             rydPerShell = sum(rydPerShell,2);
             totaldeac = sum(totaldeac,2);
             eden = sum(eden,2);
         end
             
             totalTotal = eden + rydPerShell + totaldeac;
+            if (fractionExpressedOutOfTrueTotal)
+                totalTotal = sum(totalTotal, 2);
+            end
             eTotal = eden./totalTotal;
             totalRyd = rydPerShell./totalTotal;
             totaldeac = totaldeac./totalTotal;
