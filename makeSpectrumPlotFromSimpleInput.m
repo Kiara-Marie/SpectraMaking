@@ -8,12 +8,12 @@ minN = PQNvector(1);
 maxN = PQNvector(end);
 %minN = 60;
 %maxN = 80;
-betweenOffset = 3;
+betweenOffset = 200;
 %plot a figure of the product of the Rydberg and electron <densities> at an
 %evolution time timat varies with density as
 
 E_b = -109735./(PQNvector.^2);
-
+sortedDens = sort(mat(:,1));
 for denIndex = 2:length(mat(:,1)) 
     intensity = mat(denIndex,2:end);
     den = mat(denIndex,1);
@@ -22,20 +22,23 @@ for denIndex = 2:length(mat(:,1))
     %[lineshape,omega] = makeLineshape(intensity');
     %lineshape = lineshape * -1;
     %plot(-omega,(lineshape+(betweenOffset*denIndex)),'DisplayName',strcat("\rho_{0} = ",strrep(num2str(den),'.','p'),"\mum^{-3}"))
-    lineshape = makeStupidLineshape(intensity);
-    plot(xaxis,(lineshape+(betweenOffset*denIndex)),'DisplayName',strcat("\rho_{0} = ",strrep(num2str(den),'.','p'),"\mum^{-3}"))
+    %lineshape = makeStupidLineshape(intensity);
+    [lineshape,omega] = makeLineshape(intensity);
+    denPos = find(sortedDens == den);
+    plot(omega,(lineshape-(betweenOffset*denPos)),'DisplayName',strcat("\rho_{0} = ",num2str(den),"\mum^{-3}"))
     hold on;
 end
 title("Predicted intensity");
-%xticklabels(["85","82","77","55","49","30","26","23","0"]);
-%yticklabels([]);
+xticklabels([]);
+yticklabels([]);
 %set(gca,'xticklabel',num2str(abs(get(gca,'xtick').')))
 legend('Location','northeastoutside');
 ylabel('Intensity', 'FontSize', 16)
-xlabel('Approx Associated Principal Quantum Number', 'FontSize', 16)
-newFileName = 'nolineshape' + strrep(filename, '.csv', '.svg');
+%xlabel('Approx Associated Principal Quantum Number', 'FontSize', 16)
+newFileName = 'NormIntensity' + strrep(filename, '.csv', '.svg');
 saveas(gcf, newFileName);
     function [lineshape,omega] = makeLineshape(Intensity)
+        Intensity = Intensity / max(Intensity);
         sigma = 0;
         q = 10;
         omega =  -80:0.01:-1;
@@ -53,7 +56,6 @@ saveas(gcf, newFileName);
                 sigma(m) = Intensity(nn)*((q + epsilon)^2)/(1 + epsilon^2);
             end
             lineshape = lineshape + sigma;
-            sigma = zeros(size(omega));
             nn = nn + 1;
         end
         
@@ -61,7 +63,7 @@ saveas(gcf, newFileName);
         
         lineshape = lineshape - offset;
         
-        %lineshape=lineshape./min(lineshape);
+        %lineshape=lineshape / max(lineshape);
         
     end
 

@@ -1,12 +1,13 @@
 function [] = integrateBalancedParticles()
 % if both electrons and rydbergs represent more than this proportion
-% of the particles they will be included in the sum
+% of the particles in their own shell they will be included in the sum
 equalThreshhold = 0.1;
 
+append = true;
 % Initialization which you may need to edit
 N = 100; % shells
 rangeOfPQN = 30:80;
-rangeOfDen = [0.001, 0.01, 0.1, 0.5, 1];
+rangeOfDen = 0.001;
 t_max = 200;
 t_begin = 15;
 
@@ -35,10 +36,11 @@ for rIndex = 1:length(rangeOfDen)
         pqnIndex = pqnIndex + 1;
     end
 end
-    cd '..'
-    fileToWrite = ['May19ManyTimeIntegralCalc_BalancePoint_'...
-        ,strrep(num2str(equalThreshhold),'.','p')...
-        , '_t_begin_' , num2str(t_begin), '.csv' ];
+cd '..'
+fileToWrite = ['May19ManyTimeIntegralCalc_BalancePoint_'...
+    ,strrep(num2str(equalThreshhold),'.','p')...
+    , '_t_begin_' , num2str(t_begin), '.csv' ];
+if (~append)
     cHeader = sprintfc('%d',rangeOfPQN);
     commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commaas
     commaHeader = commaHeader(:)';
@@ -49,8 +51,9 @@ end
     fprintf(fid, ",");
     fprintf(fid,"%s\n",header);
     fclose(fid);
-    %write data to end of file
-    dlmwrite(fileToWrite,megaMatrix,'-append');
+end
+%write data to end of file
+dlmwrite(fileToWrite,megaMatrix,'-append');
 end
 
 function [result] = getIntegralOfBalanced(filename, N, balancedThreshold, t_begin)
@@ -59,12 +62,17 @@ function [result] = getIntegralOfBalanced(filename, N, balancedThreshold, t_begi
 result = 0;
 mat = csvread(filename);
 times = mat(:,1);
-dTimes = zeros(length(times),1);
-dTimes(1) = times(2);
-dTimes(2:end) = times(2:end) - times(1:end-1);
-dTimesMat = repelem(dTimes,1,N);
+
 
 [t_begin_index,~] = binarySearch(times,t_begin);
+
+times = times(t_begin_index:end);
+
+dTimes = zeros(length(times),1);
+dTimes(2:end) = times(2:end) - times(1:end-1);
+dTimes(1) = dTimes(2);
+dTimesMat = repelem(dTimes,1,N);
+
 totalRyd = mat(t_begin_index:end,2:N+1);
 totalDeac = mat(t_begin_index:end,N+2:N*2+1);
 totalElectrons = mat(t_begin_index:end,N*2+2:3*N+1);
@@ -80,12 +88,12 @@ justBalancedRyd = totalRyd(indicesToInclude);
 justBalancedElectrons = totalElectrons(indicesToInclude);
 dTimesFactor = dTimesMat(indicesToInclude);
 
+justBalancedRyd = justBalancedRyd .* dTimesFactor;
 summedRyd = sum(justBalancedRyd, 1);
-summedRyd = summedRyd .* dTimesFactor;
 result = result + sum(summedRyd, 1);
 
+justBalancedElectrons = justBalancedElectrons .* dTimesFactor;
 summedElectrons = sum(justBalancedElectrons,1);
-summedElectrons = summedElectrons .* dTimesFactor;
 result = result + sum(summedElectrons, 1);
 
 end
