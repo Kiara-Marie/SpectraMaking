@@ -1,9 +1,7 @@
 function [] = integrateBalancedParticles()
 % if both electrons and rydbergs represent more than this proportion
 % of the particles in their own shell they will be included in the sum
-equalThreshhold = 0.01;
-
-append = false;
+equalThreshhold = 0.05;
 % Initialization which you may need to edit
 N = 100; % shells
 rangeOfPQN = 25;
@@ -42,18 +40,17 @@ cd '..'
 fileToWrite = ['May22BalancePoint_'...
     ,strrep(num2str(equalThreshhold),'.','p')...
     , '_t_begin_' , num2str(t_begin), '.csv' ];
-if (~append)
-    cHeader = sprintfc('%d',rangeOfPQN);
-    commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commaas
-    commaHeader = commaHeader(:)';
-    header = cell2mat(commaHeader); %cHeader in text with commas
-    
-    %write header to file
-    fid = fopen(fileToWrite,'w');
-    fprintf(fid, ",");
-    fprintf(fid,"%s\n",header);
-    fclose(fid);
-end
+cHeader = sprintfc('%d',rangeOfPQN);
+commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commaas
+commaHeader = commaHeader(:)';
+header = cell2mat(commaHeader); %cHeader in text with commas
+
+%write header to file
+fid = fopen(fileToWrite,'w');
+fprintf(fid, ",");
+fprintf(fid,"%s\n",header);
+fclose(fid);
+
 %write data to end of file
 dlmwrite(fileToWrite,megaMatrix,'-append');
 end
