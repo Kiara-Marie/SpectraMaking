@@ -30,24 +30,18 @@ for pqn = rangeOfPQN
 end
 
     function [] = makeDenTimePlots()
-        filename = ['pqn_' , num2str(pqn) , 'Density_' , strrep(num2str(density),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(t_max)];
-        csvwrite(['All_Fractions_vs_time',filename,'.csv'],[time,totalRyd,totaldeac,eTotal,Te,vol]);        
+        toWrite = [time,totalRyd,totaldeac,eTotal,Te,vol];
+        numCols = size(toWrite);
+        numCols = numCols(2);
+        filename = ['pqn_', num2str(pqn), ...
+        'Density_' , strrep(num2str(density),'.','p') , ...
+        '_shells_' , num2str(N) , '_t_max_' , num2str(t_max)];
+        fileId = fopen(['All_Fractions_vs_time',filename,'.bin'],'w');
+        fwrite(fileId,length(time),'int');
+        fwrite(fileId,numCols,'int');
+        fwrite(fileId,toWrite,'double');
+        fclose(fileId);
     end
-
-    function[] = makeInnerAndOuterTimePlots()
-        filename = ['pqn_' , num2str(pqn) , 'Density_' , strrep(num2str(density),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(t_max)];
-        reshapedRyd = reshape(nden,numel(time),100,N); % 100 should be number of pqns considered
-        reshapedRyd = sum(reshapedRyd, 2);
-        innerRydShell = reshapedRyd(:,1,1);
-        outerRydShell = reshapedRyd(:,1,N);
-        
-        innerEshell = eden(:,1);
-        outerEshell = eden(:,N);
-        
-        csvwrite(['Inner_Fraction_vs_time',filename,'.csv'],[time, innerRydShell, innerEshell]);
-        csvwrite(['Outer_Fraction_vs_time',filename,'.csv'],[time, outerRydShell,outerEshell]);
-    end
-
 
     function [totalRyd,eTotal,totaldeac] = getTotals()
         
