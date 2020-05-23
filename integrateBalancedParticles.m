@@ -4,9 +4,9 @@ function [] = integrateBalancedParticles()
 equalThreshhold = 0.05;
 % Initialization which you may need to edit
 N = 100; % shells
-rangeOfPQN = 30:80;
-rangeOfDen = [0.001, 0.01, 0.1, 0.2, 0.4, 0.5, 0.8, 1];
-t_max = 200;
+rangeOfPQN = 25;
+rangeOfDen = 0.01
+t_max = 30;
 t_begin = 0;
 
 %Initialization of things that will be used
@@ -17,13 +17,15 @@ for rIndex = 1:length(rangeOfDen)
     r = rangeOfDen(1,rIndex);
     
     % Go into the directory with the info we want
-    dirname = ['C:\Users\Kiara\Documents\glw\CleanBifurcation\Results\MoreTimesCalcs_den_' , strrep(num2str(r),'.','p')];
+    dirname = ['C:\Users\Kiara\Documents\glw\CleanBifurcation\SpectraMaking\MoreTimesCalcs_den_' , strrep(num2str(r),'.','p')];
     cd (dirname);
     pqnIndex = 2;
     for pqn = rangeOfPQN
         
         %Get name of file to look in
-        filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , 'Density_' , strrep(num2str(r),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(t_max),'.csv'];
+        filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , ...
+            'Density_' , strrep(num2str(r),'.','p') , '_shells_' , ...
+            num2str(N) , '_t_max_' , num2str(t_max),'.bin'];
         
         if ~(isfile(filename))
             fprintf("missing file! %s\n", filename);
@@ -57,7 +59,11 @@ function [result] = getIntegralOfBalanced(filename, N, balancedThreshold, t_begi
 % matrix is organized [times,totalRyd,totaldeac,totalE,Te,vol]
 %                      1        N         N       N    1   N
 result = 0;
-mat = csvread(filename);
+fid = fopen(filename, 'r');
+numRows = fread(fid, 1, 'int');
+numCols = fread(fid, 1, 'int');
+mat = fread(fid, [numRows,numCols], 'double');
+fclose(fid);
 times = mat(:,1);
 
 
