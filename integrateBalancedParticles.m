@@ -1,15 +1,15 @@
 function [] = integrateBalancedParticles()
 % if both electrons and rydbergs represent more than this proportion
 % of the particles in their own shell they will be included in the sum
-equalThreshhold = 0.1;
+equalThreshhold = 0.05;
 
-append = true;
+append = false;
 % Initialization which you may need to edit
 N = 100; % shells
 rangeOfPQN = 30:80;
-rangeOfDen = 0.001;
+rangeOfDen = [0.001, 0.01, 0.1, 0.2, 0.4, 0.5, 0.8, 1];
 t_max = 200;
-t_begin = 15;
+t_begin = 0;
 
 %Initialization of things that will be used
 megaMatrix = zeros(numel(rangeOfDen), numel(rangeOfPQN) + 1);
@@ -37,7 +37,7 @@ for rIndex = 1:length(rangeOfDen)
     end
 end
 cd '..'
-fileToWrite = ['May19ManyTimeIntegralCalc_BalancePoint_'...
+fileToWrite = ['May22BalancePoint_'...
     ,strrep(num2str(equalThreshhold),'.','p')...
     , '_t_begin_' , num2str(t_begin), '.csv' ];
 if (~append)

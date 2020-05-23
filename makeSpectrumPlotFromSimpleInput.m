@@ -3,7 +3,7 @@ mat = csvread(filename);
 
 PQNvector = mat(1,2:end);
 PQNvector = PQNvector(PQNvector ~= 0);
-
+mat = mat(:, 1:length(PQNvector)+1);
 minN = PQNvector(1);
 maxN = PQNvector(end);
 %minN = 60;
@@ -16,13 +16,8 @@ E_b = -109735./(PQNvector.^2);
 sortedDens = sort(mat(:,1));
 for denIndex = 2:length(mat(:,1)) 
     intensity = mat(denIndex,2:end);
+    intensity = logisticAdjustment(intensity, PQNvector);
     den = mat(denIndex,1);
-    xaxis = mat(1,2:end);
-    xaxis = repelem(xaxis,5);
-    %[lineshape,omega] = makeLineshape(intensity');
-    %lineshape = lineshape * -1;
-    %plot(-omega,(lineshape+(betweenOffset*denIndex)),'DisplayName',strcat("\rho_{0} = ",strrep(num2str(den),'.','p'),"\mum^{-3}"))
-    %lineshape = makeStupidLineshape(intensity);
     [lineshape,omega] = makeLineshape(intensity);
     denPos = find(sortedDens == den);
     plot(omega,(lineshape-(betweenOffset*denPos)),'DisplayName',strcat("\rho_{0} = ",num2str(den),"\mum^{-3}"))
@@ -63,16 +58,15 @@ saveas(gcf, newFileName);
         
         lineshape = lineshape - offset;
         
-        %lineshape=lineshape / max(lineshape);
-        
     end
 
-    function [lineshape] = makeStupidLineshape(intensity)
-        lineshape = zeros(length(intensity)*5,1);
-        lineshape(1:5:length(lineshape)) = intensity;
-        lineshape = lineshape / max(lineshape);
-           
+    function [adjusted] = logisticAdjustment(intensity, pqnVector)
+        k = 0.8;
+        z = 76;
+        factorToDivideBy = exp(k*(pqnVector - z)) + 1;
+        adjusted = intensity ./ factorToDivideBy;
     end
+
 
 end
 
