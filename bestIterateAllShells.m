@@ -1,5 +1,6 @@
 function bestIterateAllShells(density,t_max,rangeOfPQN)
-SumOverShells = true;
+sumOverShells = false;
+fractionExpressedOutOfTrueTotal = true;
 
 % runs simulation with density in um^-3, t_max in ns
 
@@ -7,7 +8,7 @@ addToPath = pwd;
 addpath(addToPath);
 
 N = 100; % shells
-steps = 20; %time steps
+steps = 0; %time steps
 
 
 totalRyd = zeros(1);
@@ -15,7 +16,7 @@ sigma_z=1000; %Gaussian width in um
 sigma_x=2000; %um
 sigma_env=5;
 
-dirname = ['TestCalcs_den_' , strrep(num2str(density),'.','p')];
+dirname = ['MoreTimesCalcs_den_' , strrep(num2str(density),'.','p')];
 pqnIndex = 1;
 for pqn = rangeOfPQN
     filename = ['pqn_' , num2str(pqn) , 'Density0_' , strrep(num2str(density),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(t_max)];
@@ -64,13 +65,16 @@ end
         
         totaldeac = deac_dr+nmDeacPerShell+pdDeacPerShell;
         
-        if SumOverShells 
+        if sumOverShells 
             rydPerShell = sum(rydPerShell,2);
             totaldeac = sum(totaldeac,2);
             eden = sum(eden,2);
         end
             
             totalTotal = eden + rydPerShell + totaldeac;
+            if (fractionExpressedOutOfTrueTotal)
+                totalTotal = sum(totalTotal, 2);
+            end
             eTotal = eden./totalTotal;
             totalRyd = rydPerShell./totalTotal;
             totaldeac = totaldeac./totalTotal;

@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --job-name=ASDen0p1
+#SBATCH --job-name=AS_Den0p1
 #SBATCH --account=def-edgrant
 #SBATCH --time=9:00:00
 #SBATCH --mem=100000
