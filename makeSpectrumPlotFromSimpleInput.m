@@ -1,6 +1,6 @@
 function [] = makeSpectrumPlotFromSimpleInput(filename)
 mat = csvread(filename);
-
+figure();
 PQNvector = mat(1,2:end);
 PQNvector = PQNvector(PQNvector ~= 0);
 mat = mat(:, 1:length(PQNvector)+1);
@@ -16,7 +16,7 @@ E_b = -109735./(PQNvector.^2);
 sortedDens = sort(mat(:,1));
 for denIndex = 2:length(mat(:,1)) 
     intensity = mat(denIndex,2:end);
-    intensity = logisticAdjustment(intensity, PQNvector);
+    %intensity = logisticAdjustment(intensity, PQNvector);
     den = mat(denIndex,1);
     [lineshape,omega] = makeLineshape(intensity);
     denPos = find(sortedDens == den);
@@ -30,7 +30,7 @@ yticklabels([]);
 legend('Location','northeastoutside');
 ylabel('Intensity', 'FontSize', 16)
 %xlabel('Approx Associated Principal Quantum Number', 'FontSize', 16)
-newFileName = 'NormIntensity' + strrep(filename, '.csv', '.svg');
+newFileName = "NormIntensity" + strrep(filename, '.csv', '.svg');
 saveas(gcf, newFileName);
     function [lineshape,omega] = makeLineshape(Intensity)
         Intensity = Intensity / max(Intensity);

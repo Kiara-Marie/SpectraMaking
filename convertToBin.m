@@ -1,4 +1,4 @@
-rangeOfDen = [0.01, 0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.5];
+rangeOfDen = [0.4, 0.5, 0.6, 0.8, 1];
 folderPrefix = "MoreTimesCalcs_den_";
 for den = rangeOfDen
     folderName = folderPrefix + strrep(num2str(den), '.', 'p');
