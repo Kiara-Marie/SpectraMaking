@@ -1,13 +1,13 @@
-function [] = integrateBalancedParticles()
+function [fileToWrite] = integrateBalancedParticles(t_begin, equalThreshhold)
 % if both electrons and rydbergs represent more than this proportion
 % of the particles in their own shell they will be included in the sum
-equalThreshhold = 0.05;
+
 % Initialization which you may need to edit
 N = 100; % shells
-rangeOfPQN = 25;
-rangeOfDen = 0.01
-t_max = 30;
-t_begin = 0;
+rangeOfPQN = 30:79;
+rangeOfDen = [0.01, 0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.5];
+t_max = 200;
+
 
 %Initialization of things that will be used
 megaMatrix = zeros(numel(rangeOfDen), numel(rangeOfPQN) + 1);
@@ -17,7 +17,8 @@ for rIndex = 1:length(rangeOfDen)
     r = rangeOfDen(1,rIndex);
     
     % Go into the directory with the info we want
-    dirname = ['C:\Users\Kiara\Documents\glw\CleanBifurcation\SpectraMaking\MoreTimesCalcs_den_' , strrep(num2str(r),'.','p')];
+    dirname = ['.\KillPenning_den_'...
+        , strrep(num2str(r),'.','p')];
     cd (dirname);
     pqnIndex = 2;
     for pqn = rangeOfPQN
@@ -37,7 +38,7 @@ for rIndex = 1:length(rangeOfDen)
     end
 end
 cd '..'
-fileToWrite = ['May22BalancePoint_'...
+fileToWrite = ['KillPenningCalcs_p_balance_'...
     ,strrep(num2str(equalThreshhold),'.','p')...
     , '_t_begin_' , num2str(t_begin), '.csv' ];
 cHeader = sprintfc('%d',rangeOfPQN);
