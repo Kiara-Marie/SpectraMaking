@@ -1,15 +1,16 @@
 function [] =  shellCrossSection()
 clf;
+readFromCsv = false;
+plotElectrons = false;
 % Initialization which you may need to edit
 N = 100; % shells
-%rangeOfPQN = [30,40,50,60,70];
-rangeOfPQN = 30:40;
-rangeOfDen = [0.6];
-rangeOfEndTime = 100;
+rangeOfPQN = [50];
+%rangeOfPQN = 30:40;
+rangeOfDen = [0.2];
+rangeOfEndTime = [20, 40, 60, 80, 100] ;
 %rangeOfEndTime = [100]
-den = 0.1;
-fileTime = 350;
-t_max = 350;
+
+t_max = 200;
 
 sigma_x = 700; %um
 sigma_env = 5;
@@ -18,42 +19,61 @@ pos_x=linspace(0.5*sigma_env*sigma_x/(N-0.5),sigma_env*sigma_x,N);
 firstHalf = pos_x(2:end);
 firstHalf = -1*fliplr(firstHalf);
 xaxis = [firstHalf, pos_x];
+xaxis = xaxis / 1000;
 index = 1;
 
 for den = rangeOfDen
-for pqn = rangeOfPQN
-    for endTime = rangeOfEndTime
-            yaxis = getYAxis(pqn, den, endTime);
+    for pqn = rangeOfPQN
+        for endTime = rangeOfEndTime
+            [eAxis, rydAxis] = getYAxis(pqn, den, endTime);
             title =['\rho_{0} = ',strrep(num2str(den),'.','p'),'\mum^{-3}, n_0 = ',num2str(pqn),...
                 ' time = ', num2str(endTime), 'ns'];
-            plot(xaxis,yaxis,'DisplayName',['\rho_{0} = ',strrep(num2str(den),'.','p'),'\mum^{-3}, n_0 = ',num2str(pqn),...
+            plot(xaxis,eAxis,'--','DisplayName',['electrons, \rho_{0} = ',num2str(den),'\mum^{-3}, n_0 = ',num2str(pqn),...
+                ', time = ', num2str(endTime), 'ns']);
+            hold on;
+            plot(xaxis,rydAxis,'DisplayName',['rydbergs, \rho_{0} = ',num2str(den),'\mum^{-3}, n_0 = ',num2str(pqn),...
                 ', time = ', num2str(endTime), 'ns']);
             legend('Location','northeastoutside');
             hold on;
             index = index + 1;
+        end
     end
 end
-end
 
-xlabel('x-position in \mu m');
-ylabel('Fractional electron density');
+xlabel('x-position in mm');
+ylabel('Density in \mum^{-3}');
 
 
-    function yaxis = getYAxis(pqn, den, endTime)
+    function [eAxis, rydAxis] = getYAxis(pqn, den, endTime)
         dirname = ...
-            ['C:\Users\Kiara\Documents\glw\CleanBifurcation\Results\Oct14\BestCalcs_den_' ...
+            ['C:\Users\Kiara\Documents\glw\CleanBifurcation\Results\MoreTimesCalcs_den_' ...
             , strrep(num2str(den),'.','p')];
         cd (dirname);
-        yaxis = zeros(N*2 - 1,1);
-        filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , 'Density_'...
-            , strrep(num2str(den),'.','p') , '_shells_' , num2str(N) , '_t_max_'...
-            , num2str(t_max),'.csv'];
-        if ~(isfile(filename))
-            fprintf("missing file! %s\n", filename);
-            return;
+        eAxis = zeros(N*2 - 1,1);
+        rydAxis = zeros(N*2 - 1,1);
+        if (readFromCsv)
+            filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , 'Density_'...
+                , strrep(num2str(den),'.','p') , '_shells_' , num2str(N) , '_t_max_'...
+                , num2str(t_max),'.csv'];
+            if ~(isfile(filename))
+                fprintf("missing file! %s\n", filename);
+                return;
+            end
+            mat = csvread(filename);
+        else
+            filename = ['All_Fractions_vs_timepqn_',num2str(pqn) , 'Density_'...
+                , strrep(num2str(den),'.','p') , '_shells_' , num2str(N) , '_t_max_'...
+                , num2str(t_max),'.bin'];
+            if ~(isfile(filename))
+                fprintf("missing file! %s\n", filename);
+                return;
+            end
+            fid = fopen(filename, 'r');
+            numRows = fread(fid, 1, 'int');
+            numCols = fread(fid, 1, 'int');
+            mat = fread(fid, [numRows,numCols], 'double');
+            fclose(fid);
         end
-        mat = csvread(filename);
-        
         
         time_full = mat(:,1);
         
@@ -69,8 +89,11 @@ ylabel('Fractional electron density');
             vol(whichShell) = mat(indexToLook,whichShell+3*N+2);
         end
         
-        yaxis(1:N) = fliplr(totalE);
-        yaxis(N:2*N-1) = totalE;
+        eAxis(1:N) = fliplr(totalE);
+        eAxis(N:2*N-1) = totalE;
+        
+        rydAxis(1:N) = fliplr(totalRyd);
+        rydAxis(N:2*N-1) = totalRyd;
         cd '..';
         return;
     end

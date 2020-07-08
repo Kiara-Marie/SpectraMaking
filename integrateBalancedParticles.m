@@ -4,8 +4,8 @@ function [fileToWrite] = integrateBalancedParticles(t_begin, equalThreshhold)
 
 % Initialization which you may need to edit
 N = 100; % shells
-rangeOfPQN = 30:79;
-rangeOfDen = [0.01, 0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.5];
+rangeOfPQN = 50;
+rangeOfDen = [0.5];
 t_max = 200;
 
 
@@ -17,7 +17,7 @@ for rIndex = 1:length(rangeOfDen)
     r = rangeOfDen(1,rIndex);
     
     % Go into the directory with the info we want
-    dirname = ['.\KillPenning_den_'...
+    dirname = ['.\MoreTimesCalcs_den_'...
         , strrep(num2str(r),'.','p')];
     cd (dirname);
     pqnIndex = 2;
@@ -46,14 +46,14 @@ commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commaas
 commaHeader = commaHeader(:)';
 header = cell2mat(commaHeader); %cHeader in text with commas
 
-%write header to file
-fid = fopen(fileToWrite,'w');
-fprintf(fid, ",");
-fprintf(fid,"%s\n",header);
-fclose(fid);
-
-%write data to end of file
-dlmwrite(fileToWrite,megaMatrix,'-append');
+% %write header to file
+% fid = fopen(fileToWrite,'w');
+% fprintf(fid, ",");
+% fprintf(fid,"%s\n",header);
+% fclose(fid);
+% 
+% %write data to end of file
+% dlmwrite(fileToWrite,megaMatrix,'-append');
 end
 
 function [result] = getIntegralOfBalanced(filename, N, balancedThreshold, t_begin)
