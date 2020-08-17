@@ -1,7 +1,6 @@
 function [] =  shellCrossSection()
 clf;
 readFromCsv = false;
-plotElectrons = false;
 % Initialization which you may need to edit
 N = 100; % shells
 rangeOfPQN = [50];
@@ -46,7 +45,7 @@ ylabel('Density in \mum^{-3}');
 
     function [eAxis, rydAxis] = getYAxis(pqn, den, endTime)
         dirname = ...
-            ['C:\Users\Kiara\Documents\glw\CleanBifurcation\Results\MoreTimesCalcs_den_' ...
+            ['C:\Users\Kiara\Documents\glw\CleanBifurcation\Results\SpecialSigma\SpecialSigma_den_' ...
             , strrep(num2str(den),'.','p')];
         cd (dirname);
         eAxis = zeros(N*2 - 1,1);

@@ -17,7 +17,7 @@ sigma_z=420; %Gaussian width in um
 sigma_x=750; %um
 sigma_env=5;
 
-dirname = ['SpecialSigma_den_' , strrep(num2str(density),'.','p')];
+dirname = ['NewRESMOTest_den_' , strrep(num2str(density),'.','p')];
 pqnIndex = 1;
 for pqn = rangeOfPQN
     filename = ['pqn_' , num2str(pqn) , 'Density0_' , strrep(num2str(density),'.','p') , '_shells_' , num2str(N) , '_t_max_' , num2str(t_max)];
